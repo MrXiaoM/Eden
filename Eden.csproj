@@ -13,6 +13,24 @@
     <PackageProjectUrl>https://github.com/MrXiaoM/Eden</PackageProjectUrl>
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <FileVersion>1.0.0</FileVersion>
+    <ApplicationIcon>eden.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="docs\**" />
+    <Compile Remove="files\**" />
+    <EmbeddedResource Remove="docs\**" />
+    <EmbeddedResource Remove="files\**" />
+    <None Remove="docs\**" />
+    <None Remove="files\**" />
+    <Page Remove="docs\**" />
+    <Page Remove="files\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="eden.ico">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
 
 </Project>

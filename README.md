@@ -1,6 +1,10 @@
+<img align="right" src="docs/eden.png" width="128"/>
+
 # 伊甸 Eden
 
 未来框架版本信息自动提取工具。
+
+
 
 # 声明
 

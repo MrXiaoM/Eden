@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Eden"
         mc:Ignorable="d" WindowStartupLocation="CenterScreen"
         MinHeight="450" MinWidth="800"
-        Title="伊甸 Eden" Height="450" Width="800">
+        Title="伊甸 Eden" Height="450" Width="800" Icon="pack://application:,,,/eden.ico">
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
