@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <Title>伊甸</Title>
+    <Authors>MrXiaoM</Authors>
+    <Description>未来框架协议信息生成器</Description>
+    <Copyright>© MrXiaoM 2023 保留所有权利</Copyright>
+    <PackageProjectUrl>https://github.com/MrXiaoM/Eden</PackageProjectUrl>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
+  </PropertyGroup>
+
+</Project>

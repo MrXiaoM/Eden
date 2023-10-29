@@ -1,0 +1,31 @@
+﻿<Window x:Class="Eden.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Eden"
+        mc:Ignorable="d" WindowStartupLocation="CenterScreen"
+        MinHeight="450" MinWidth="800"
+        Title="伊甸 Eden" Height="450" Width="800">
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel x:Name="ControlPanel" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnUnPack_Click">开始解包 (./apk/classes*.dex)</Button>
+            <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnExtractClasses_Click">提取类 (./cache/classes.*.jar)</Button>
+            <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnDecompile_Click">反编译 (./classes/###.class)</Button>
+            <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnReadCode_Click">分析反编译结果 (./decompile/###.java)</Button>
+            <TextBlock Margin="0,0,0,10">(可选: 将 Eden.apk 放到本程序目录)</TextBlock>
+        </StackPanel>
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0">日志</TextBlock>
+            <TextBox Grid.Row="1" x:Name="logBox" IsReadOnly="True" MaxLines="1000000000" TextWrapping="Wrap" VerticalScrollBarVisibility="Visible"></TextBox>
+        </Grid>
+    </Grid>
+</Window>
