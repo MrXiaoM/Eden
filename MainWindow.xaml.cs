@@ -171,6 +171,12 @@ namespace Eden
             CodeReader.Run(info, "decompile");
         }
 
+        private void BtnExportLog_Click(object sender, RoutedEventArgs e)
+        {
+            File.WriteAllText("eden.log", logBox.Text, Encoding.UTF8);
+            MessageBox.Show("日志已保存");
+        }
+
 
         /// <summary>
         /// 反编译 class 文件到 decompile 文件夹

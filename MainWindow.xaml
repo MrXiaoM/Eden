@@ -18,6 +18,7 @@
             <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnDecompile_Click">反编译 (./classes/###.class)</Button>
             <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnReadCode_Click">分析反编译结果 (./decompile/###.java)</Button>
             <TextBlock Margin="0,0,0,10">(可选: 将 Eden.apk 放到本程序目录)</TextBlock>
+            <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnExportLog_Click">导出日志 (./eden.log)</Button>
         </StackPanel>
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
