@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,7 +16,7 @@ namespace Eden
     /// </summary>
     class CodeReader
     {
-        public static void Run(Action<string> info, string root)
+        public static async void Run(Action<string> info, string root)
         {
 
             var read = (string path) =>
@@ -191,31 +194,52 @@ namespace Eden
                 File.Copy("apk/lib/arm64-v8a/libfekit.so", $"{dir}/libfekit.so", true);
                 fekit = true;
             }
+
             if (File.Exists("Eden.apk"))
             {
-                using (var fs = new FileStream("Eden.apk", FileMode.Open, FileAccess.Read, FileShare.Read))
-                {
-                    var md5Provider = System.Security.Cryptography.MD5.Create();
-                    protocol.apkSign = BitConverter.ToString(md5Provider.ComputeHash(fs)).Replace("-", "").ToLower();
-                    md5Provider.Clear();
-                }
-                if (!fekit)
+                var extractCert = !File.Exists("apk/META-INF/ANDROIDR.RSA");
+                if (!fekit || extractCert)
                 {
                     using (var archive = ZipFile.OpenRead("Eden.apk"))
                     {
-                        var entry = archive.GetEntry("lib/arm64-v8a/libfekit.so");
-                        if (entry != null)
+                        if (!fekit)
                         {
-                            entry.ExtractToFile($"{dir}/libfekit.so");
+                            var entry = archive.GetEntry("lib/arm64-v8a/libfekit.so");
+                            if (entry != null)
+                            {
+                                entry.ExtractToFile($"{dir}/libfekit.so");
+                                fekit = true;
+                            }
+                        }
+                        if (extractCert)
+                        {
+                            var entryCert = archive.GetEntry("META-INF/ANDROIDR.RSA");
+                            if (entryCert != null)
+                            {
+                                entryCert.ExtractToFile("apk/META-INF/ANDROIDR.RSA");
+                            }
                         }
                     }
                 }
             }
+            if (File.Exists("apk/META-INF/ANDROIDR.RSA"))
+            {
+                try
+                {
+                    var cert = X509Certificate.CreateFromCertFile("apk/META-INF/ANDROIDR.RSA");
+                    protocol.apkSign = cert.GetCertHashString(HashAlgorithmName.MD5).ToLower();
+                    info(protocol.apkSign);
+                }
+                catch (Exception e)
+                {
+                    info("(分析) 获取APK签名时发生了一个异常");
+                    info($"(分析) {e.GetType().FullName}:{e.Message}");
+                }
+            }
             else
             {
-                info("(分析) 未找到 Eden.apk，将使用默认 apk_sign");
+                info("(分析) 未找到签名文件，将使用默认 apk_sign");
             }
-
             if (protocol.qua != null)
             {
                 var s = protocol.qua.Split("_");
