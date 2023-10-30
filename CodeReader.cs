@@ -265,12 +265,12 @@ namespace Eden
   {"}"}
 {"}"}
 ";
-                File.WriteAllText($"{dir}/config.json", config, Encoding.UTF8);
+                write($"{dir}/config.json", config);
             }
             var phone = protocol.json(false);
             var pad = protocol.json(true);
-            File.WriteAllText($"{dir}/android_phone.json", phone, Encoding.UTF8);
-            File.WriteAllText($"{dir}/android_pad.json", pad, Encoding.UTF8);
+            write($"{dir}/android_phone.json", phone);
+            write($"{dir}/android_pad.json", pad);
 
             // TODO: dtconfig.json
             if (sFEBound != null)
@@ -302,7 +302,7 @@ namespace Eden
   ]
 {"}"}
 ";
-                File.WriteAllText($"{dir}/dtconfig.json", dtconfig, Encoding.UTF8);
+                write($"{dir}/dtconfig.json", dtconfig);
             }
             info($"(分析) android_phone.json:\n{phone}");
             info($"(分析) android_pad.json:\n{pad}");
@@ -319,6 +319,11 @@ namespace Eden
             {
                 info("(分析) 未找到 libfekit.so，请自行从安装包中提取该库文件");
             }
+        }
+
+        private static void write(string path, string contents)
+        {
+            File.WriteAllText(path, contents, new UTF8Encoding(false));
         }
     }
 }
