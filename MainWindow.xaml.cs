@@ -27,6 +27,26 @@ namespace Eden
             InitializeComponent();
         }
 
+        private async void BtnExtractAPK_Click(object sender, RoutedEventArgs e)
+        {
+            ControlPanel.IsEnabled = false;
+            await Task.Run(() =>
+            {
+                if (!File.Exists("Eden.apk"))
+                {
+                    info("(解包) Eden.apk 不存在!");
+                    return;
+                }
+                info("(解包) 正在删除目录 ./apk...");
+                Directory.Delete("apk", true);
+                Directory.CreateDirectory("apk");
+                info("(解包) 正在解压 Eden.apk...");
+                ZipFile.ExtractToDirectory("Eden.apk", "apk");
+                info("(解包) 解压完成!");
+            });
+            ControlPanel.IsEnabled = true;
+        }
+
         private async void BtnUnPack_Click(object sender, RoutedEventArgs e)
         {
             ControlPanel.IsEnabled = false;
