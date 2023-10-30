@@ -43,7 +43,7 @@ namespace Eden
             int i = 1;
             foreach (string file in files)
             {
-                var command = $@"""tools\\d2j-dex2jar"" apk\\{file} -o cache\\{file[..^4]}.jar";
+                var command = $@"""tools\d2j-dex2jar"" apk\{file} -o cache\{file[..^4]}.jar";
                 info("(dex2jar) .");
                 info($"(dex2jar) 开始转换 {i}/{files.Count} {command}");
                 var process = new Process
@@ -190,7 +190,7 @@ namespace Eden
             {
                 files.Add($"{baseDir}\\{s.Replace(".", "\\")}.class");
             }
-            var command = $@"""tools\\procyon"" {string.Join(" ", files)} -o decompile";
+            var command = $@"""tools\procyon"" {string.Join(" ", files)} -o decompile";
             var process = new Process
             {
                 StartInfo = new("cmd.exe")
