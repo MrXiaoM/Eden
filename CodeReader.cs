@@ -220,7 +220,7 @@ namespace Eden
             {
                 var s = protocol.qua.Split("_");
                 string config = $@"{"{"}
-  ""server"": {"{}"}
+  ""server"": {"{"}
     ""host"": ""0.0.0.0"",
     ""port"": 8080
   {"}"},
