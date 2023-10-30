@@ -166,9 +166,11 @@ namespace Eden
             ControlPanel.IsEnabled = true;
         }
 
-        private void BtnReadCode_Click(object sender, RoutedEventArgs e)
+        private async void BtnReadCode_Click(object sender, RoutedEventArgs e)
         {
-            CodeReader.Run(info, "decompile");
+            ControlPanel.IsEnabled = false;
+            await Task.Run(() => CodeReader.Run(info, "decompile"));
+            ControlPanel.IsEnabled = true;
         }
 
         private void BtnExportLog_Click(object sender, RoutedEventArgs e)
