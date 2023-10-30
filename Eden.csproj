@@ -11,9 +11,8 @@
     <Description>未来框架协议信息生成器</Description>
     <Copyright>© MrXiaoM 2023 保留所有权利</Copyright>
     <PackageProjectUrl>https://github.com/MrXiaoM/Eden</PackageProjectUrl>
-    <AssemblyVersion>1.0.0</AssemblyVersion>
-    <FileVersion>1.0.0</FileVersion>
     <ApplicationIcon>eden.ico</ApplicationIcon>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
