@@ -15,6 +15,7 @@ namespace Eden
         public MainWindow()
         {
             InitializeComponent();
+            Title += $" {System.Reflection.Assembly.GetExecutingAssembly()?.GetName()?.Version?.ToString(3)}";
         }
 
         private async void BtnExtractAPK_Click(object sender, RoutedEventArgs e)
