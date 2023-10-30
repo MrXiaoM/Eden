@@ -5,29 +5,35 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Eden"
         mc:Ignorable="d" WindowStartupLocation="CenterScreen"
-        MinHeight="450" MinWidth="800"
+        MinHeight="450" MinWidth="800" Background="#2A2A2A"
         Title="伊甸 Eden" Height="450" Width="800" Icon="pack://application:,,,/eden.ico">
-    <Grid Margin="10">
+    <Grid Margin="10,10,10,0">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition />
         </Grid.ColumnDefinitions>
-        <StackPanel x:Name="ControlPanel" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Top">
-            <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnExtractAPK_Click">开始解压 Eden.apk</Button>
-            <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnUnPack_Click">开始转换 (./apk/classes*.dex)</Button>
-            <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnExtractClasses_Click">提取类 (./cache/classes*.jar)</Button>
-            <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnDecompile_Click">反编译 (./classes/###.class)</Button>
-            <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnReadCode_Click">分析反编译结果 (./decompile/###.java)</Button>
-            <TextBlock Margin="0,0,0,10">(可选: 将 Eden.apk 放到本程序目录)</TextBlock>
-            <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnExportLog_Click">导出日志 (./eden.log)</Button>
-        </StackPanel>
-        <Grid Grid.Column="1">
+        <Grid HorizontalAlignment="Left">
+            <Image HorizontalAlignment="Left" VerticalAlignment="Bottom" Source="pack://application:,,,/eden.ico" Stretch="None" Cursor="Hand" MouseDown="Image_MouseDown">
+                <Image.ToolTip>开源地址: https://github.com/MrXiaoM/Eden</Image.ToolTip>
+            </Image>
+            <StackPanel x:Name="ControlPanel" Margin="0,0,0,10">
+                <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnExtractAPK_Click">开始解压 Eden.apk</Button>
+                <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnUnPack_Click">开始转换 (./apk/classes*.dex)</Button>
+                <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnExtractClasses_Click">提取类 (./cache/classes*.jar)</Button>
+                <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnDecompile_Click">反编译 (./classes/###.class)</Button>
+                <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnReadCode_Click">分析反编译结果 (./decompile/###.java)</Button>
+                <TextBlock Margin="0,0,0,10" Foreground="#EFEFEF">(可选: 将 Eden.apk 放到本程序目录)</TextBlock>
+                <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnExportLog_Click">导出日志 (./eden.log)</Button>
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Column="2" Margin="0,0,0,10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0">日志</TextBlock>
-            <TextBox Grid.Row="1" x:Name="logBox" IsReadOnly="True" MaxLines="1000000000" TextWrapping="Wrap" VerticalScrollBarVisibility="Visible"></TextBox>
+            <TextBlock Grid.Row="0" Foreground="#EFEFEF">日志</TextBlock>
+            <TextBox Grid.Row="1" x:Name="logBox" IsReadOnly="True" MaxLines="1000000000" Background="#232323" Foreground="#EFEFEF" TextWrapping="Wrap" VerticalScrollBarVisibility="Visible"></TextBox>
         </Grid>
     </Grid>
 </Window>

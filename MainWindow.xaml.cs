@@ -252,5 +252,10 @@ namespace Eden
                 logBox.ScrollToEnd();
             });
         }
+
+        private void Image_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            Process.Start("explorer", "https://github.com/MrXiaoM/Eden");
+        }
     }
 }
