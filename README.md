@@ -1,4 +1,4 @@
-<img align="right" src="docs/eden.png" width="128"/>
+<img align="right" src="docs/eden.png" width="256"/>
 
 # 伊甸 Eden
 
