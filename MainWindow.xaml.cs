@@ -37,8 +37,11 @@ namespace Eden
                     info("(解包) Eden.apk 不存在!");
                     return;
                 }
-                info("(解包) 正在删除目录 ./apk...");
-                Directory.Delete("apk", true);
+                if (Directory.Exists("apk"))
+                {
+                    info("(解包) 正在删除目录 ./apk...");
+                    Directory.Delete("apk", true);
+                }
                 Directory.CreateDirectory("apk");
                 info("(解包) 正在解压 Eden.apk...");
                 ZipFile.ExtractToDirectory("Eden.apk", "apk");
