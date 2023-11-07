@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -8,6 +9,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace Eden
 {
@@ -16,7 +18,7 @@ namespace Eden
     /// </summary>
     class CodeReader
     {
-        public static async void Run(Action<string> info, string root)
+        public static async void Run(Action<string> info, string root, bool readFromAndroidManifest)
         {
 
             var read = (string path) =>
@@ -198,7 +200,8 @@ namespace Eden
             if (File.Exists("Eden.apk"))
             {
                 var extractCert = !File.Exists("apk/META-INF/ANDROIDR.RSA");
-                if (!fekit || extractCert)
+                var extractAndroidManifest = readFromAndroidManifest && !File.Exists("apk/AndroidManifest.xml");
+                if (!fekit || extractCert || extractAndroidManifest)
                 {
                     using (var archive = ZipFile.OpenRead("Eden.apk"))
                     {
@@ -217,6 +220,14 @@ namespace Eden
                             if (entryCert != null)
                             {
                                 entryCert.ExtractToFile("apk/META-INF/ANDROIDR.RSA");
+                            }
+                        }
+                        if (extractAndroidManifest)
+                        {
+                            var entryAM = archive.GetEntry("AndroidManifest.xml");
+                            if (entryAM != null)
+                            {
+                                entryAM.ExtractToFile("apk/AndroidManifest.xml");
                             }
                         }
                     }
@@ -239,6 +250,76 @@ namespace Eden
             else
             {
                 info("(分析) 未找到签名文件，将使用默认 apk_sign");
+            }
+            if (readFromAndroidManifest)
+            {
+                if (File.Exists("apk/AndroidManifest.xml"))
+                {
+                    if (!File.Exists("decompile/AndroidManifest.xml"))
+                    {
+                        var command = @"""tools\xml-decode"" apk\AndroidManifest.xml > decompile\AndroidManifest.xml";
+                        var process = new Process
+                        {
+                            StartInfo = new("cmd.exe")
+                            {
+                                Arguments = $"/C {command}",
+                                WorkingDirectory = Environment.CurrentDirectory,
+                                RedirectStandardOutput = true,
+                                RedirectStandardError = true,
+                                StandardOutputEncoding = Encoding.UTF8,
+                                UseShellExecute = false,
+                                CreateNoWindow = true
+                            }
+                        };
+                        process.Start();
+                        await process.WaitForExitAsync();
+                    }
+                    if (File.Exists("decompile/AndroidManifest.xml"))
+                    {
+                        var xml = new XmlDocument();
+                        xml.Load("decompile/AndroidManifest.xml");
+                        var application = xml["manifest"]?["application"]?.ChildNodes;
+                        int tmpAppId = -1, tmpAppIdPad = -1;
+                        if (application != null)
+                        {
+                            foreach (XmlNode node in application)
+                            {
+                                if (node.Name != "meta-data") continue;
+                                var metaName = node.Attributes?["android:name"];
+                                var metaValue = node.Attributes?["android:value"];
+                                if (metaName == null || metaValue == null) continue;
+                                if (metaName.Value == "AppSetting_params" && int.TryParse(metaValue.Value.Split('#')[0], out int result))
+                                {
+                                    info("(分析) " + metaName.Value + " = " + metaValue.Value);
+                                    tmpAppId = result;
+                                }
+                                if (metaName.Value == "AppSetting_params_pad" && int.TryParse(metaValue.Value.Split('#')[0], out int result1))
+                                {
+                                    info("(分析) " + metaName.Value + " = " + metaValue.Value);
+                                    tmpAppIdPad = result1;
+                                }
+                            }
+                        }
+                        if (tmpAppId == -1 || tmpAppIdPad == -1)
+                        {
+                            info("(分析) AndroidManifest.xml 读取失败，无法找到目标节点，将使用反编译获得的 apk_id");
+                        }
+                        else
+                        {
+                            protocol.appIdPhone = tmpAppId.ToString();
+                            protocol.appIdPad = tmpAppIdPad.ToString();
+                            info("(分析) 成功从 AndroidManifest.xml 取得 apk_id");
+                        }
+                    }
+                    else
+                    {
+                        info("(分析) AndroidManifest.xml 转换失败，将使用反编译获得的 apk_id");
+                    }
+                }
+                else
+                {
+                    info("(分析) 未找到 AndroidManifest.xml，将使用反编译获得的 apk_id");
+                }
             }
             if (protocol.qua != null)
             {

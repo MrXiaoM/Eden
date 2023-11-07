@@ -236,7 +236,8 @@ namespace Eden
         private async void BtnReadCode_Click(object sender, RoutedEventArgs e)
         {
             ControlPanel.IsEnabled = false;
-            await Task.Run(() => CodeReader.Run(info, "decompile"));
+            bool readFromAndroidManifest = CheckReadFromXML.IsChecked ?? false;
+            await Task.Run(() => CodeReader.Run(info, "decompile", readFromAndroidManifest));
             ControlPanel.IsEnabled = true;
         }
 

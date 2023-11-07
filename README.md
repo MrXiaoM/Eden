@@ -24,3 +24,4 @@
 
 * [pxb1988/dex2jar](https://github.com/pxb1988/dex2jar) 提供dex转jar方法 - Apache-2.0 License
 * [mstrobel/procyon](https://github.com/mstrobel/procyon) 提供反编译工具 - Apache-2.0 License
+* [googlecode/android4me](https://code.google.com/archive/p/android4me) 提供安卓XML解密方法 - Apache-2.0 License

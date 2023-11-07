@@ -37,6 +37,15 @@
                     <StackPanel>
                         <Button Margin="0,5,0,5" Padding="10,2,10,2" Click="BtnReadCode_Click">分析反编译结果 (./decompile/*.java)</Button>
                         <TextBlock Margin="0,0,0,5" Foreground="#EFEFEF">(可选: 将 Eden.apk 放到本程序目录)</TextBlock>
+                        <CheckBox x:Name="CheckReadFromXML" Margin="0,0,0,5" Foreground="#EFEFEF">
+                            <CheckBox.Content>
+                                <TextBlock>
+                            从 AndroidManifest.xml 读取 AppID<LineBreak/>
+                            注: 不同渠道的apk，xml 里的 AppID<LineBreak/>
+                            各不相同，请按需决定是否开启此选项。
+                                </TextBlock>
+                            </CheckBox.Content>
+                        </CheckBox>
                     </StackPanel>
                 </GroupBox>
                 <Button Padding="10,2,10,2" Click="BtnExportLog_Click">导出日志 (./eden.log)</Button>
