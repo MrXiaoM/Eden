@@ -203,8 +203,8 @@ namespace Eden
                     CreateNoWindow = true
                 }
             };
-            process.OutputDataReceived += dex2jar_OutputDataReceived;
-            process.ErrorDataReceived += dex2jar_OutputDataReceived;
+            process.OutputDataReceived += dex2jarPartly_OutputDataReceived;
+            process.ErrorDataReceived += dex2jarPartly_OutputDataReceived;
             process.Start();
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
@@ -287,6 +287,13 @@ namespace Eden
             if (e.Data != null)
             {
                 info($"(dex2jar) {e.Data}");
+            }
+        }
+        private void dex2jarPartly_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            if (e.Data != null)
+            {
+                info($"(dex2jar-partly) {e.Data}");
             }
         }
         private void procyon_OutputDataReceived(object sender, DataReceivedEventArgs e)
