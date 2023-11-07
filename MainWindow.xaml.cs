@@ -162,6 +162,59 @@ namespace Eden
             extract("cooperation/qzone/QUA.class");
         }
 
+
+        private async void BtnQuickUnPack_Click(object sender, RoutedEventArgs e)
+        {
+            ControlPanel.IsEnabled = false;
+            var classes = new string[] {
+                "com/tencent/mobileqq/dt/model/FEBound",
+                "com/tencent/common/config/AppSetting",
+                "oicq/wlogin_sdk/report/event/EventConstant",
+                "oicq/wlogin_sdk/report/event/EventConstant$EventParams",
+                "oicq/wlogin_sdk/report/event/EventConstant$EventType",
+                "oicq/wlogin_sdk/tools/util",
+                "oicq/wlogin_sdk/request/WtloginHelper",
+                "cooperation/qzone/QUA"
+            };
+            var files = new List<string>();
+            var di = new DirectoryInfo("apk");
+            foreach (FileInfo file in di.GetFiles("*.dex"))
+            {
+                files.Add(@$"apk\{file.Name}");
+            }
+            files.Sort();
+            info("正在执行 dex 转 jar (快速): " + string.Join(", ", files) + "\n");
+
+            var workingDir = Environment.CurrentDirectory;
+            int i = 1;
+            var command = $@"""tools\d2j-dex2jar-partly"" {string.Join(' ', files)} --classes {string.Join(' ', classes)} --output classes";
+            info("(dex2jar-partly) .");
+            info($"(dex2jar-partly) 开始转换");
+            var process = new Process
+            {
+                StartInfo = new("cmd.exe")
+                {
+                    Arguments = $"/C {command}",
+                    WorkingDirectory = workingDir,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    StandardOutputEncoding = Encoding.UTF8,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+            process.OutputDataReceived += dex2jar_OutputDataReceived;
+            process.ErrorDataReceived += dex2jar_OutputDataReceived;
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+            await process.WaitForExitAsync();
+            info($"(dex2jar-partly) 完成！(ExitCode: {process.ExitCode})");
+            info(".");
+            info("dex 转 jar (快速) 执行完毕");
+
+            ControlPanel.IsEnabled = true;
+        }
         private async void BtnDecompile_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button) return;

@@ -21,6 +21,7 @@
                 <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnExtractAPK_Click">开始解压 Eden.apk</Button>
                 <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnUnPack_Click">开始转换 (./apk/classes*.dex)</Button>
                 <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnExtractClasses_Click">提取类 (./cache/classes*.jar)</Button>
+                <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnQuickUnPack_Click">快速转换 (dex -> class)</Button>
                 <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnDecompile_Click">反编译 (./classes/###.class)</Button>
                 <Button Margin="0,0,0,10" Padding="10,2,10,2" Click="BtnReadCode_Click">分析反编译结果 (./decompile/###.java)</Button>
                 <TextBlock Margin="0,0,0,10" Foreground="#EFEFEF">(可选: 将 Eden.apk 放到本程序目录)</TextBlock>
