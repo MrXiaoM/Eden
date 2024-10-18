@@ -12,7 +12,6 @@
     <PackageIcon>eden.ico</PackageIcon>
     <RepositoryUrl>https://github.com/MrXiaoM/Eden</RepositoryUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <StartupObject>Program</StartupObject>
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
     <AssemblyVersion>1.0.5</AssemblyVersion>
     <FileVersion>1.0.5</FileVersion>
