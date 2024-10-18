@@ -92,7 +92,7 @@ class Program
         if (options.can(3))
         {
             await CodeReader.Run(info, tasks.workDir, options.EdenAPK ?? "Eden.apk", options.readProtocolFromManifest,
-                options.ConfigOverride, options.PhoneOverride, options.PadOverride);
+                options.OutputOverride, options.ConfigOverride, options.DtConfigOverride, options.PhoneOverride, options.PadOverride);
         }
     }
 
