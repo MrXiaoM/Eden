@@ -16,25 +16,28 @@ namespace Eden
         public static async Task Run(Action<string> info, string root, string apkName, bool readFromAndroidManifest,
             string? outputOverride = null, string? configOverride = null, string? dtconfigOverride = null, string? phoneOverride = null, string? padOverride = null)
         {
-            var read = (string path) =>
+            var read = (string className) =>
             {
-                path = root + $"decompile/{path.Replace(".", "/")}.java";
+                var path = root + $"decompile/{className.Replace(".", "/")}.java";
                 if (!File.Exists(path))
                 {
-                    info($"(分析) 文件不存在: {path}");
+                    info($"(分析) {className} 未找到!!");
                     return null;
                 }
-                return File.ReadAllText(path, Encoding.UTF8);
+                var s = File.ReadAllText(path, Encoding.UTF8);
+                info($"(分析) {className} 状态良好");
+                return s;
             };
             info("(分析) 开始分析反编译结果");
             var sFEBound = read("com.tencent.mobileqq.dt.model.FEBound");
             var sAppSetting = read("com.tencent.common.config.AppSetting");
             var sEventConstant = read("oicq.wlogin_sdk.report.event.EventConstant");
             var sUtil = read("oicq.wlogin_sdk.tools.util");
-            var sWtLoginHelper = read("oicq.wlogin_sdk.request.WtLoginHelper");
+            var sWtLoginHelper = read("oicq.wlogin_sdk.request.WtloginHelper");
             var sQUA = read("cooperation.qzone.QUA");
             var protocol = new MiraiProtocol();
             var version = "unknown";
+
             if (sAppSetting != null)
             {
                 int subVersion = 0;
