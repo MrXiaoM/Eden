@@ -22,6 +22,35 @@
 
 在对某大型 APP 进行过完整分析后，本程序可以使用极短的时间，定点分析抽离 APK 中我们所需的参数并输出，而不需要整个 APK 反编译耗费这么长时间，在作者的计算机中只需使用大约10秒时间就可以将所需的 class 文件从 dex 中导出。
 
+## CLI 使用方法
+
+安装运行环境: https://learn.microsoft.com/zh-cn/dotnet/core/install/linux
+
+运行
+```shell
+dotnet Eden.CLI.dll 参数
+```
+可用参数
+```shell
+  --working-dir          Eden 工作路径
+  --eden-apk             Eden.apk 路径，要相对于工作路径
+  --fast-dex             (Default: true) 是否使用快速解包方法
+  --output-override      输出文件夹(out/版本号/)路径重写
+  --config-override      文件 config.json 输出路径重写，会覆盖 output-override
+  --dtconfig-override    文件 dtconfig.json 输出路径重写，会覆盖 output-override
+  --pad-override         文件 android_pad.json 输出路径重写，会覆盖 output-override
+  --phone-override       文件 android_phone.json 输出路径重写，会覆盖 output-override
+  --from-manifest        (Default: true) 是否从 AndroidManifest.xml 读取协议 app id
+  --start-pos            (Default: 0) 起始步骤，0=解压APK，1=解包Dex，2=反编译class，3=分析代码
+  --help                 Display this help screen.
+  --version              Display version information.
+```
+示例如下
+```shell
+mkdir -r protocol-versions/android_phone protocol-versions/android_pad
+dotnet Eden.CLI.dll --working-dir v9065 --eden-apk Android_9.0.65_64.apk --phone-override protocol-versions/android_phone/9.0.65.json --pad-override protocol-versions/android_pad/9.0.65.json
+```
+
 ## 构建
 
 请阅读 files 文件夹内的说明。
