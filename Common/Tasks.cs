@@ -7,9 +7,19 @@ namespace Eden
 {
     public class Tasks
     {
+        public static string currentDir
+        {
+            get
+            {
+                var s = Environment.CurrentDirectory.Replace("\\", "/");
+                return s.EndsWith("/") ? s : (s + "/");
+            }
+        }
         bool isWin = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         public string workDir;
+        public string edenApk = "Eden.apk";
         Action<string> info;
+        public bool error = false;
         public Tasks(Action<string> info, string workDir)
         {
             this.info = info;
@@ -18,24 +28,27 @@ namespace Eden
 
         public void ExtractAPK()
         {
-            if (!File.Exists(workDir + "Eden.apk"))
+            error = false;
+            if (!File.Exists(workDir + edenApk))
             {
-                info("(解包) Eden.apk 不存在!");
+                info($"(解包) {edenApk} 不存在!");
+                error = true;
                 return;
             }
             if (Directory.Exists(workDir + "apk"))
             {
                 info("(解包) 正在删除目录 ./apk...");
-                Directory.Delete("apk", true);
+                Directory.Delete(workDir + "apk", true);
             }
             Directory.CreateDirectory(workDir + "apk");
-            info("(解包) 正在解压 Eden.apk...");
-            ZipFile.ExtractToDirectory(workDir + "Eden.apk", workDir + "apk");
+            info($"(解包) 正在解压 {edenApk}...");
+            ZipFile.ExtractToDirectory(workDir + edenApk, workDir + "apk");
             info("(解包) 解压完成!");
         }
 
         public async Task SlowUnpackDex(DataReceivedEventHandler received)
         {
+            error = false;
             var files = new List<string>();
             var di = new DirectoryInfo(workDir + "apk");
             foreach (FileInfo file in di.GetFiles("*.dex"))
@@ -48,7 +61,7 @@ namespace Eden
             int i = 1;
             foreach (string file in files)
             {
-                var command = $@"""tools/d2j-dex2jar"" apk/{file} -o cache/{file[..^4]}.jar";
+                var command = $@"""{currentDir}tools/d2j-dex2jar{(isWin ? ".bat" : ".sh")}"" apk/{file} -o cache/{file[..^4]}.jar";
                 info("(dex2jar) .");
                 info($"(dex2jar) 开始转换 {i}/{files.Count} {command}");
                 var process = new Process
@@ -70,6 +83,7 @@ namespace Eden
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
                 await process.WaitForExitAsync();
+                error = process.ExitCode != 0;
                 info($"(dex2jar) 完成！(ExitCode: {process.ExitCode})");
                 info("(提取类) 正在打开压缩包…");
                 await Task.Run(() =>
@@ -95,6 +109,7 @@ namespace Eden
 
         public void SlowExtractClasses()
         {
+            error = false;
             var files = new List<string>();
             var di = new DirectoryInfo(workDir + "cache");
             foreach (FileInfo file in di.GetFiles("*.jar"))
@@ -125,6 +140,7 @@ namespace Eden
 
         private void extractClasses(ZipArchive archive)
         {
+            error = false;
             var extract = (string entryName) =>
             {
                 var entry = archive.GetEntry(entryName);
@@ -148,6 +164,7 @@ namespace Eden
 
         public async Task FastUnpackDex(DataReceivedEventHandler received)
         {
+            error = false;
             var classes = new string[] {
                 "com/tencent/mobileqq/dt/model/FEBound",
                 "com/tencent/common/config/AppSetting",
@@ -167,7 +184,7 @@ namespace Eden
             files.Sort();
             info("正在执行 dex 转 jar (快速): " + string.Join(", ", files) + "\n");
 
-            var command = $@"""tools/d2j-dex2jar-partly"" {string.Join(' ', files)} --classes {string.Join(' ', classes)} --output classes";
+            var command = $@"""{currentDir}tools/d2j-dex2jar-partly{(isWin ? ".bat" : ".sh")}"" {string.Join(' ', files)} --classes {string.Join(' ', classes)} --output classes";
             info("(dex2jar-partly) .");
             info($"(dex2jar-partly) 开始转换");
             var process = new Process
@@ -189,6 +206,7 @@ namespace Eden
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
             await process.WaitForExitAsync();
+            error = process.ExitCode != 0;
             info($"(dex2jar-partly) 完成！(ExitCode: {process.ExitCode})");
             info(".");
             info("dex 转 jar (快速) 执行完毕");
@@ -213,13 +231,14 @@ namespace Eden
         /// <returns>Procyon 退出码</returns>
         public async Task<int> decompile(DataReceivedEventHandler received, string baseDir, params string[] classes)
         {
+            error = false;
             info("(procyon) 开始反编译");
             var files = new List<string>();
             foreach (string s in classes)
             {
                 files.Add($"{baseDir}/{s.Replace(".", "/")}.class");
             }
-            var command = $@"""tools/procyon"" {string.Join(" ", files)} -o decompile";
+            var command = $@"""{currentDir}tools/procyon{(isWin ? ".bat" : ".sh")}"" {string.Join(" ", files)} -o decompile";
             var process = new Process
             {
                 StartInfo = new(isWin ? "cmd.exe" : "sh")
@@ -239,7 +258,8 @@ namespace Eden
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
             await process.WaitForExitAsync();
-            info("(procyon) 反编译结束");
+            info($"(procyon) 反编译结束 (ExitCode: {process.ExitCode})");
+            error = process.ExitCode != 0;
             return process.ExitCode;
         }
     }

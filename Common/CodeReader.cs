@@ -13,8 +13,8 @@ namespace Eden
     /// </summary>
     public class CodeReader
     {
-        public static async void Run(Action<string> info, string root, string apkName, bool readFromAndroidManifest,
-            string? configOverride = null, string? phoneOverride = null, string? padOverride = null)
+        public static async Task Run(Action<string> info, string root, string apkName, bool readFromAndroidManifest,
+            string? outputOverride = null, string? configOverride = null, string? dtconfigOverride = null, string? phoneOverride = null, string? padOverride = null)
         {
             var read = (string path) =>
             {
@@ -182,7 +182,9 @@ namespace Eden
                     }
                 }
             }
-            var dir = root + $"out/{version}";
+            var dir = outputOverride ?? (root + $"out/{version}");
+            dir = dir.Replace("\\", "/");
+            if (dir.EndsWith("/")) dir = dir[..^1];
             if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
             bool fekit = false;
@@ -230,16 +232,20 @@ namespace Eden
             }
             if (File.Exists(root + "apk/META-INF/ANDROIDR.RSA"))
             {
+                info($"(分析) 签名文件: {root}apk/META-INF/ANDROIDR.RSA");
                 try
                 {
-                    var cert = X509Certificate.CreateFromCertFile(root + "apk/META-INF/ANDROIDR.RSA");
+                    var collection = new X509Certificate2Collection();
+                    collection.Import(File.ReadAllBytes(root + "apk/META-INF/ANDROIDR.RSA"));
+                    var cert = collection.Cast<X509Certificate2>().First();
+                    //var cert = X509Certificate2.CreateFromCertFile(root + "apk/META-INF/ANDROIDR.RSA");
                     protocol.apkSign = cert.GetCertHashString(HashAlgorithmName.MD5).ToLower();
-                    info(protocol.apkSign);
+                    info($"(分析) APK 签名: {protocol.apkSign}");
                 }
                 catch (Exception e)
                 {
                     info("(分析) 获取APK签名时发生了一个异常");
-                    info($"(分析) {e.GetType().FullName}:{e.Message}");
+                    info($"(分析) {e.GetType().FullName}: {e.Message}");
                 }
             }
             else
@@ -252,8 +258,9 @@ namespace Eden
                 {
                     if (!File.Exists(root + "decompile/AndroidManifest.xml"))
                     {
+                        info("(分析) 正在解码 AndroidManifest.xml");
                         bool isWin = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-                        var command = @"""tools/xml-decode"" apk/AndroidManifest.xml > decompile/AndroidManifest.xml";
+                        var command = @$"""{Tasks.currentDir}tools/xml-decode{(isWin ? ".bat" : ".sh")}"" apk/AndroidManifest.xml";
                         var process = new Process
                         {
                             StartInfo = new(isWin ? "cmd.exe" : "sh")
@@ -267,11 +274,28 @@ namespace Eden
                                 CreateNoWindow = true
                             }
                         };
+                        List<string> list= new List<string>();
+                        DataReceivedEventHandler received = (sender, e) => {
+                            if (e.Data != null)
+                            {
+                                if (list.Count == 0)
+                                {
+                                    info("(分析) 解码完成，正在保存");
+                                }
+                                list.Add(e.Data);
+                            }
+                        };
+                        process.OutputDataReceived += received;
+                        process.ErrorDataReceived += received;
                         process.Start();
+                        process.BeginOutputReadLine();
+                        process.BeginErrorReadLine();
                         await process.WaitForExitAsync();
+                        await File.WriteAllLinesAsync(root + "decompile/AndroidManifest.xml", list, new UTF8Encoding(false));
                     }
                     if (File.Exists(root + "decompile/AndroidManifest.xml"))
                     {
+                        info("(分析) 正在分析 AndroidManifest.xml");
                         var xml = new XmlDocument();
                         xml.Load(root + "decompile/AndroidManifest.xml");
                         var application = xml["manifest"]?["application"]?.ChildNodes;
@@ -379,11 +403,11 @@ namespace Eden
   ]
 {"}"}
 ";
-                write($"{dir}/dtconfig.json", dtconfig);
+                write(dtconfigOverride ?? $"{dir}/dtconfig.json", dtconfig);
             }
             info($"(分析) android_phone.json:\n{phone}");
             info($"(分析) android_pad.json:\n{pad}");
-            info($"(分析) 分析结束，已生成数据到 {dir}: android_phone.json, android_pad.json{(protocol.qua == null ? "" : ", config.json")}{(sFEBound == null ? "" : ", dtconfig.json")}");
+            info($"(分析) 分析结束，已生成数据到 {dir}");
             if (sAppSetting == null || sEventConstant == null || sUtil == null || sWtLoginHelper == null || sQUA == null)
             {
                 info("(分析) 部分类不存在 (详见日志)，生成的文件内容可能不完整，请自行补齐文件中的 null 值");
