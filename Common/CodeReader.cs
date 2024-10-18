@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO.Compression;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -12,12 +13,12 @@ namespace Eden
     /// </summary>
     public class CodeReader
     {
-        public static async void Run(Action<string> info, string root, bool readFromAndroidManifest)
+        public static async void Run(Action<string> info, string root, string apkName, bool readFromAndroidManifest,
+            string? configOverride = null, string? phoneOverride = null, string? padOverride = null)
         {
-
             var read = (string path) =>
             {
-                path = $"{root}\\{path.Replace(".", "\\")}.java";
+                path = root + $"decompile/{path.Replace(".", "/")}.java";
                 if (!File.Exists(path))
                 {
                     info($"(分析) 文件不存在: {path}");
@@ -181,23 +182,23 @@ namespace Eden
                     }
                 }
             }
-            var dir = $"out/{version}";
+            var dir = root + $"out/{version}";
             if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
             bool fekit = false;
-            if (File.Exists("apk/lib/arm64-v8a/libfekit.so"))
+            if (File.Exists(root + "apk/lib/arm64-v8a/libfekit.so"))
             {
-                File.Copy("apk/lib/arm64-v8a/libfekit.so", $"{dir}/libfekit.so", true);
+                File.Copy(root + "apk/lib/arm64-v8a/libfekit.so", $"{dir}/libfekit.so", true);
                 fekit = true;
             }
 
-            if (File.Exists("Eden.apk"))
+            if (File.Exists(root + apkName))
             {
-                var extractCert = !File.Exists("apk/META-INF/ANDROIDR.RSA");
-                var extractAndroidManifest = readFromAndroidManifest && !File.Exists("apk/AndroidManifest.xml");
+                var extractCert = !File.Exists(root + "apk/META-INF/ANDROIDR.RSA");
+                var extractAndroidManifest = readFromAndroidManifest && !File.Exists(root + "apk/AndroidManifest.xml");
                 if (!fekit || extractCert || extractAndroidManifest)
                 {
-                    using (var archive = ZipFile.OpenRead("Eden.apk"))
+                    using (var archive = ZipFile.OpenRead(root + apkName))
                     {
                         if (!fekit)
                         {
@@ -213,7 +214,7 @@ namespace Eden
                             var entryCert = archive.GetEntry("META-INF/ANDROIDR.RSA");
                             if (entryCert != null)
                             {
-                                entryCert.ExtractToFile("apk/META-INF/ANDROIDR.RSA");
+                                entryCert.ExtractToFile(root + "apk/META-INF/ANDROIDR.RSA");
                             }
                         }
                         if (extractAndroidManifest)
@@ -221,17 +222,17 @@ namespace Eden
                             var entryAM = archive.GetEntry("AndroidManifest.xml");
                             if (entryAM != null)
                             {
-                                entryAM.ExtractToFile("apk/AndroidManifest.xml");
+                                entryAM.ExtractToFile(root + "apk/AndroidManifest.xml");
                             }
                         }
                     }
                 }
             }
-            if (File.Exists("apk/META-INF/ANDROIDR.RSA"))
+            if (File.Exists(root + "apk/META-INF/ANDROIDR.RSA"))
             {
                 try
                 {
-                    var cert = X509Certificate.CreateFromCertFile("apk/META-INF/ANDROIDR.RSA");
+                    var cert = X509Certificate.CreateFromCertFile(root + "apk/META-INF/ANDROIDR.RSA");
                     protocol.apkSign = cert.GetCertHashString(HashAlgorithmName.MD5).ToLower();
                     info(protocol.apkSign);
                 }
@@ -247,17 +248,18 @@ namespace Eden
             }
             if (readFromAndroidManifest)
             {
-                if (File.Exists("apk/AndroidManifest.xml"))
+                if (File.Exists(root + "apk/AndroidManifest.xml"))
                 {
-                    if (!File.Exists("decompile/AndroidManifest.xml"))
+                    if (!File.Exists(root + "decompile/AndroidManifest.xml"))
                     {
-                        var command = @"""tools\xml-decode"" apk\AndroidManifest.xml > decompile\AndroidManifest.xml";
+                        bool isWin = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+                        var command = @"""tools/xml-decode"" apk/AndroidManifest.xml > decompile/AndroidManifest.xml";
                         var process = new Process
                         {
-                            StartInfo = new("cmd.exe")
+                            StartInfo = new(isWin ? "cmd.exe" : "sh")
                             {
-                                Arguments = $"/C {command}",
-                                WorkingDirectory = Environment.CurrentDirectory,
+                                Arguments = isWin ? $"/C {command}" : command,
+                                WorkingDirectory = root,
                                 RedirectStandardOutput = true,
                                 RedirectStandardError = true,
                                 StandardOutputEncoding = Encoding.UTF8,
@@ -268,10 +270,10 @@ namespace Eden
                         process.Start();
                         await process.WaitForExitAsync();
                     }
-                    if (File.Exists("decompile/AndroidManifest.xml"))
+                    if (File.Exists(root + "decompile/AndroidManifest.xml"))
                     {
                         var xml = new XmlDocument();
-                        xml.Load("decompile/AndroidManifest.xml");
+                        xml.Load(root + "decompile/AndroidManifest.xml");
                         var application = xml["manifest"]?["application"]?.ChildNodes;
                         int tmpAppId = -1, tmpAppIdPad = -1;
                         if (application != null)
@@ -340,12 +342,12 @@ namespace Eden
   {"}"}
 {"}"}
 ";
-                write($"{dir}/config.json", config);
+                write(configOverride ?? $"{dir}/config.json", config);
             }
             var phone = protocol.json(false);
             var pad = protocol.json(true);
-            write($"{dir}/android_phone.json", phone);
-            write($"{dir}/android_pad.json", pad);
+            write(phoneOverride ?? $"{dir}/android_phone.json", phone);
+            write(padOverride ?? $"{dir}/android_pad.json", pad);
 
             // TODO: dtconfig.json
             if (sFEBound != null)

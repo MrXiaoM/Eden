@@ -15,7 +15,7 @@ namespace Eden.GUI
         public MainWindow()
         {
             InitializeComponent();
-            tasks = new Tasks(info);
+            tasks = new Tasks(info, Environment.CurrentDirectory);
             Title += $" {System.Reflection.Assembly.GetExecutingAssembly()?.GetName()?.Version?.ToString(3)}";
         }
 
@@ -59,7 +59,8 @@ namespace Eden.GUI
         {
             ControlPanel.IsEnabled = false;
             bool readFromAndroidManifest = CheckReadFromXML.IsChecked ?? false;
-            await Task.Run(() => CodeReader.Run(info, "decompile", readFromAndroidManifest));
+            var workingDir = Environment.CurrentDirectory.Replace("\\", "/");
+            await Task.Run(() => CodeReader.Run(info, workingDir.EndsWith("/") ? workingDir : (workingDir + "/"), "Eden.apk", readFromAndroidManifest));
             ControlPanel.IsEnabled = true;
         }
 

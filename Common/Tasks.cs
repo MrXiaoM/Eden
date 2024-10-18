@@ -1,39 +1,43 @@
 ﻿using System.Diagnostics;
 using System.IO.Compression;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Eden
 {
     public class Tasks
     {
+        bool isWin = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        public string workDir;
         Action<string> info;
-        public Tasks(Action<string> info)
+        public Tasks(Action<string> info, string workDir)
         {
             this.info = info;
+            this.workDir = workDir.EndsWith("/") ? workDir : (workDir + "/");
         }
 
         public void ExtractAPK()
         {
-            if (!File.Exists("Eden.apk"))
+            if (!File.Exists(workDir + "Eden.apk"))
             {
                 info("(解包) Eden.apk 不存在!");
                 return;
             }
-            if (Directory.Exists("apk"))
+            if (Directory.Exists(workDir + "apk"))
             {
                 info("(解包) 正在删除目录 ./apk...");
                 Directory.Delete("apk", true);
             }
-            Directory.CreateDirectory("apk");
+            Directory.CreateDirectory(workDir + "apk");
             info("(解包) 正在解压 Eden.apk...");
-            ZipFile.ExtractToDirectory("Eden.apk", "apk");
+            ZipFile.ExtractToDirectory(workDir + "Eden.apk", workDir + "apk");
             info("(解包) 解压完成!");
         }
 
         public async Task SlowUnpackDex(DataReceivedEventHandler received)
         {
             var files = new List<string>();
-            var di = new DirectoryInfo("apk");
+            var di = new DirectoryInfo(workDir + "apk");
             foreach (FileInfo file in di.GetFiles("*.dex"))
             {
                 files.Add(file.Name);
@@ -41,19 +45,18 @@ namespace Eden
             files.Sort();
             info("正在执行 dex 转 jar: " + string.Join(", ", files) + "\n");
 
-            var workingDir = Environment.CurrentDirectory;
             int i = 1;
             foreach (string file in files)
             {
-                var command = $@"""tools\d2j-dex2jar"" apk\{file} -o cache\{file[..^4]}.jar";
+                var command = $@"""tools/d2j-dex2jar"" apk/{file} -o cache/{file[..^4]}.jar";
                 info("(dex2jar) .");
                 info($"(dex2jar) 开始转换 {i}/{files.Count} {command}");
                 var process = new Process
                 {
-                    StartInfo = new("cmd.exe")
+                    StartInfo = new(isWin ? "cmd.exe" : "sh")
                     {
-                        Arguments = $"/C {command}",
-                        WorkingDirectory = workingDir,
+                        Arguments = isWin ? $"/C {command}" : command,
+                        WorkingDirectory = workDir,
                         RedirectStandardOutput = true,
                         RedirectStandardError = true,
                         StandardOutputEncoding = Encoding.UTF8,
@@ -73,7 +76,7 @@ namespace Eden
                 {
                     try
                     {
-                        using (var archive = ZipFile.OpenRead($"cache\\{file[..^4]}.jar"))
+                        using (var archive = ZipFile.OpenRead(workDir + $"cache/{file[..^4]}.jar"))
                         {
                             extractClasses(archive);
                         }
@@ -93,7 +96,7 @@ namespace Eden
         public void SlowExtractClasses()
         {
             var files = new List<string>();
-            var di = new DirectoryInfo("cache");
+            var di = new DirectoryInfo(workDir + "cache");
             foreach (FileInfo file in di.GetFiles("*.jar"))
             {
                 files.Add(file.Name);
@@ -106,7 +109,7 @@ namespace Eden
                 info($"(提取类) 正在打开压缩包 {i}/{files.Count} {file}");
                 try
                 {
-                    using (var archive = ZipFile.OpenRead($"cache\\{file}"))
+                    using (var archive = ZipFile.OpenRead(workDir + $"cache/{file}"))
                     {
                         extractClasses(archive);
                     }
@@ -127,7 +130,7 @@ namespace Eden
                 var entry = archive.GetEntry(entryName);
                 if (entry != null)
                 {
-                    FileInfo fi = new FileInfo("classes/" + entry.FullName);
+                    FileInfo fi = new FileInfo(workDir + "classes/" + entry.FullName);
                     if (!(fi.Directory?.Exists ?? false)) fi.Directory?.Create();
                     entry.ExtractToFile(fi.FullName, true);
                     info($"(提取类) 已导出 {entry.FullName}");
@@ -156,25 +159,23 @@ namespace Eden
                 "cooperation/qzone/QUA"
             };
             var files = new List<string>();
-            var di = new DirectoryInfo("apk");
+            var di = new DirectoryInfo(workDir + "apk");
             foreach (FileInfo file in di.GetFiles("*.dex"))
             {
-                files.Add(@$"apk\{file.Name}");
+                files.Add(@$"apk/{file.Name}");
             }
             files.Sort();
             info("正在执行 dex 转 jar (快速): " + string.Join(", ", files) + "\n");
 
-            var workingDir = Environment.CurrentDirectory;
-            int i = 1;
-            var command = $@"""tools\d2j-dex2jar-partly"" {string.Join(' ', files)} --classes {string.Join(' ', classes)} --output classes";
+            var command = $@"""tools/d2j-dex2jar-partly"" {string.Join(' ', files)} --classes {string.Join(' ', classes)} --output classes";
             info("(dex2jar-partly) .");
             info($"(dex2jar-partly) 开始转换");
             var process = new Process
             {
-                StartInfo = new("cmd.exe")
+                StartInfo = new(isWin ? "cmd.exe" : "sh")
                 {
-                    Arguments = $"/C {command}",
-                    WorkingDirectory = workingDir,
+                    Arguments = isWin ? $"/C {command}" : command,
+                    WorkingDirectory = workDir,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     StandardOutputEncoding = Encoding.UTF8,
@@ -216,15 +217,15 @@ namespace Eden
             var files = new List<string>();
             foreach (string s in classes)
             {
-                files.Add($"{baseDir}\\{s.Replace(".", "\\")}.class");
+                files.Add($"{baseDir}/{s.Replace(".", "/")}.class");
             }
-            var command = $@"""tools\procyon"" {string.Join(" ", files)} -o decompile";
+            var command = $@"""tools/procyon"" {string.Join(" ", files)} -o decompile";
             var process = new Process
             {
-                StartInfo = new("cmd.exe")
+                StartInfo = new(isWin ? "cmd.exe" : "sh")
                 {
-                    Arguments = $"/C {command}",
-                    WorkingDirectory = Environment.CurrentDirectory,
+                    Arguments = isWin ? $"/C {command}" : command,
+                    WorkingDirectory = workDir,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     StandardOutputEncoding = Encoding.UTF8,
