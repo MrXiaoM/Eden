@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
-using System.IO;
+﻿using System.Diagnostics;
 using System.IO.Compression;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace Eden
@@ -16,7 +10,7 @@ namespace Eden
     /// <summary>
     /// 自动阅读分析代码示例
     /// </summary>
-    class CodeReader
+    public class CodeReader
     {
         public static async void Run(Action<string> info, string root, bool readFromAndroidManifest)
         {

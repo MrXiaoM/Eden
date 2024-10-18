@@ -1,53 +1,41 @@
 ﻿using System.Diagnostics;
-using System.IO;
 using System.IO.Compression;
 using System.Text;
-using System.Windows;
-using System.Windows.Controls;
 
 namespace Eden
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
+    public class Tasks
     {
-        public MainWindow()
+        Action<string> info;
+        public Tasks(Action<string> info)
         {
-            InitializeComponent();
-            Title += $" {System.Reflection.Assembly.GetExecutingAssembly()?.GetName()?.Version?.ToString(3)}";
+            this.info = info;
         }
 
-        private async void BtnExtractAPK_Click(object sender, RoutedEventArgs e)
+        public void ExtractAPK()
         {
-            ControlPanel.IsEnabled = false;
-            await Task.Run(() =>
+            if (!File.Exists("Eden.apk"))
             {
-                if (!File.Exists("Eden.apk"))
-                {
-                    info("(解包) Eden.apk 不存在!");
-                    return;
-                }
-                if (Directory.Exists("apk"))
-                {
-                    info("(解包) 正在删除目录 ./apk...");
-                    Directory.Delete("apk", true);
-                }
-                Directory.CreateDirectory("apk");
-                info("(解包) 正在解压 Eden.apk...");
-                ZipFile.ExtractToDirectory("Eden.apk", "apk");
-                info("(解包) 解压完成!");
-            });
-            ControlPanel.IsEnabled = true;
+                info("(解包) Eden.apk 不存在!");
+                return;
+            }
+            if (Directory.Exists("apk"))
+            {
+                info("(解包) 正在删除目录 ./apk...");
+                Directory.Delete("apk", true);
+            }
+            Directory.CreateDirectory("apk");
+            info("(解包) 正在解压 Eden.apk...");
+            ZipFile.ExtractToDirectory("Eden.apk", "apk");
+            info("(解包) 解压完成!");
         }
 
-        private async void BtnUnPack_Click(object sender, RoutedEventArgs e)
+        public async Task SlowUnpackDex(DataReceivedEventHandler received)
         {
-            ControlPanel.IsEnabled = false;
-
             var files = new List<string>();
             var di = new DirectoryInfo("apk");
-            foreach (FileInfo file in di.GetFiles("*.dex")) {
+            foreach (FileInfo file in di.GetFiles("*.dex"))
+            {
                 files.Add(file.Name);
             }
             files.Sort();
@@ -73,8 +61,8 @@ namespace Eden
                         CreateNoWindow = true
                     }
                 };
-                process.OutputDataReceived += dex2jar_OutputDataReceived;
-                process.ErrorDataReceived += dex2jar_OutputDataReceived;
+                process.OutputDataReceived += received;
+                process.ErrorDataReceived += received;
                 process.Start();
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
@@ -100,43 +88,36 @@ namespace Eden
             }
             info(".");
             info("dex 转 jar 执行完毕");
-
-            ControlPanel.IsEnabled = true;
         }
 
-        private async void BtnExtractClasses_Click(object sender, RoutedEventArgs e)
+        public void SlowExtractClasses()
         {
-            ControlPanel.IsEnabled = false;
-            await Task.Run(() =>
+            var files = new List<string>();
+            var di = new DirectoryInfo("cache");
+            foreach (FileInfo file in di.GetFiles("*.jar"))
             {
-                var files = new List<string>();
-                var di = new DirectoryInfo("cache");
-                foreach (FileInfo file in di.GetFiles("*.jar"))
-                {
-                    files.Add(file.Name);
-                }
-                files.Sort();
+                files.Add(file.Name);
+            }
+            files.Sort();
 
-                int i = 1;
-                foreach (string file in files)
+            int i = 1;
+            foreach (string file in files)
+            {
+                info($"(提取类) 正在打开压缩包 {i}/{files.Count} {file}");
+                try
                 {
-                    info($"(提取类) 正在打开压缩包 {i}/{files.Count} {file}");
-                    try
+                    using (var archive = ZipFile.OpenRead($"cache\\{file}"))
                     {
-                        using (var archive = ZipFile.OpenRead($"cache\\{file}"))
-                        {
-                            extractClasses(archive);
-                        }
-                        info("(提取类) 完成");
+                        extractClasses(archive);
                     }
-                    catch (Exception e)
-                    {
-                        info($"(提取类) 打开压缩包失败: {e.Message}");
-                    }
-                    i++;
+                    info("(提取类) 完成");
                 }
-            });
-            ControlPanel.IsEnabled = true;
+                catch (Exception e)
+                {
+                    info($"(提取类) 打开压缩包失败: {e.Message}");
+                }
+                i++;
+            }
         }
 
         private void extractClasses(ZipArchive archive)
@@ -162,10 +143,8 @@ namespace Eden
             extract("cooperation/qzone/QUA.class");
         }
 
-
-        private async void BtnQuickUnPack_Click(object sender, RoutedEventArgs e)
+        public async Task FastUnpackDex(DataReceivedEventHandler received)
         {
-            ControlPanel.IsEnabled = false;
             var classes = new string[] {
                 "com/tencent/mobileqq/dt/model/FEBound",
                 "com/tencent/common/config/AppSetting",
@@ -203,8 +182,8 @@ namespace Eden
                     CreateNoWindow = true
                 }
             };
-            process.OutputDataReceived += dex2jarPartly_OutputDataReceived;
-            process.ErrorDataReceived += dex2jarPartly_OutputDataReceived;
+            process.OutputDataReceived += received;
+            process.ErrorDataReceived += received;
             process.Start();
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
@@ -212,15 +191,11 @@ namespace Eden
             info($"(dex2jar-partly) 完成！(ExitCode: {process.ExitCode})");
             info(".");
             info("dex 转 jar (快速) 执行完毕");
-
-            ControlPanel.IsEnabled = true;
         }
-        private async void BtnDecompile_Click(object sender, RoutedEventArgs e)
+
+        public async Task<int> decompile(DataReceivedEventHandler received)
         {
-            if (sender is not Button) return;
-            ControlPanel.IsEnabled = false;
-            info("(procyon) 开始反编译");
-            await decompile("classes",
+            return await decompile(received, "classes",
                 "com.tencent.mobileqq.dt.model.FEBound",
                 "com.tencent.common.config.AppSetting",
                 "oicq.wlogin_sdk.report.event.EventConstant",
@@ -228,33 +203,16 @@ namespace Eden
                 "oicq.wlogin_sdk.request.WtloginHelper",
                 "cooperation.qzone.QUA"
             );
-            info("(procyon) 反编译结束");
-
-            ControlPanel.IsEnabled = true;
         }
-
-        private async void BtnReadCode_Click(object sender, RoutedEventArgs e)
-        {
-            ControlPanel.IsEnabled = false;
-            bool readFromAndroidManifest = CheckReadFromXML.IsChecked ?? false;
-            await Task.Run(() => CodeReader.Run(info, "decompile", readFromAndroidManifest));
-            ControlPanel.IsEnabled = true;
-        }
-
-        private void BtnExportLog_Click(object sender, RoutedEventArgs e)
-        {
-            File.WriteAllText("eden.log", logBox.Text, Encoding.UTF8);
-            MessageBox.Show("日志已保存");
-        }
-
 
         /// <summary>
         /// 反编译 class 文件到 decompile 文件夹
         /// </summary>
         /// <param name="classes">class 文件路径列表，可用相对路径</param>
         /// <returns>Procyon 退出码</returns>
-        public async Task<int> decompile(string baseDir, params string[] classes)
+        public async Task<int> decompile(DataReceivedEventHandler received, string baseDir, params string[] classes)
         {
+            info("(procyon) 开始反编译");
             var files = new List<string>();
             foreach (string s in classes)
             {
@@ -274,49 +232,14 @@ namespace Eden
                     CreateNoWindow = true
                 }
             };
-            process.OutputDataReceived += procyon_OutputDataReceived;
-            process.ErrorDataReceived += procyon_OutputDataReceived;
+            process.OutputDataReceived += received;
+            process.ErrorDataReceived += received;
             process.Start();
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
             await process.WaitForExitAsync();
+            info("(procyon) 反编译结束");
             return process.ExitCode;
-        }
-
-        private void dex2jar_OutputDataReceived(object sender, DataReceivedEventArgs e)
-        {
-            if (e.Data != null)
-            {
-                info($"(dex2jar) {e.Data}");
-            }
-        }
-        private void dex2jarPartly_OutputDataReceived(object sender, DataReceivedEventArgs e)
-        {
-            if (e.Data != null)
-            {
-                info($"(dex2jar-partly) {e.Data}");
-            }
-        }
-        private void procyon_OutputDataReceived(object sender, DataReceivedEventArgs e)
-        {
-            if (e.Data != null)
-            {
-                info($"(procyon) {e.Data}");
-            }
-        }
-
-        private void info(string s)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                logBox.Text += $"{DateTime.Now.ToString("[HH:mm:ss]")} {s}\n";
-                logBox.ScrollToEnd();
-            });
-        }
-
-        private void Image_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            Process.Start("explorer", "https://github.com/MrXiaoM/Eden");
         }
     }
 }

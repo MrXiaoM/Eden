@@ -1,9 +1,9 @@
-﻿<Window x:Class="Eden.MainWindow"
+﻿<Window x:Class="Eden.GUI.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Eden"
+        xmlns:local="clr-namespace:Eden.GUI"
         mc:Ignorable="d" WindowStartupLocation="CenterScreen"
         MinHeight="480" MinWidth="800" Background="#2A2A2A"
         Title="伊甸 Eden" Height="480" Width="800" Icon="pack://application:,,,/eden.ico">
@@ -37,7 +37,7 @@
                     <StackPanel>
                         <Button Margin="0,5,0,5" Padding="10,2,10,2" Click="BtnReadCode_Click">分析反编译结果 (./decompile/*.java)</Button>
                         <TextBlock Margin="0,0,0,5" Foreground="#EFEFEF">(可选: 将 Eden.apk 放到本程序目录)</TextBlock>
-                        <CheckBox x:Name="CheckReadFromXML" Margin="0,0,0,5" Foreground="#EFEFEF">
+                        <CheckBox x:Name="CheckReadFromXML" Margin="0,0,0,5" Foreground="#EFEFEF" IsChecked="True">
                             <CheckBox.Content>
                                 <TextBlock>
                             从 AndroidManifest.xml 读取 AppID<LineBreak/>

@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <Authors>MrXiaoM</Authors>
+    <Company>MrXiaoM</Company>
+    <Copyright>© 2023-2024 MrXiaoM 保留所有权利</Copyright>
+    <PackageIcon>eden.ico</PackageIcon>
+    <RepositoryUrl>https://github.com/MrXiaoM/Eden</RepositoryUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="eden.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="eden.ico">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </Resource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
+  </ItemGroup>
+
+</Project>

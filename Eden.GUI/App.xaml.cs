@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace Eden
+namespace Eden.GUI
 {
     /// <summary>
     /// Interaction logic for App.xaml

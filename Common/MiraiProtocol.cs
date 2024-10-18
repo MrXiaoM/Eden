@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Eden
+﻿namespace Eden
 {
     /// <summary>
     /// 未来框架协议信息
@@ -47,21 +41,21 @@ namespace Eden
         {
             // 这种固定格式的就懒得加json解析了
             return @$"{"{"}
-  ""apk_id"": ""com.tencent.mobileqq"",
-  ""app_id"": {((!pad ? appIdPhone : appIdPad) ?? "null")},
-  ""sub_app_id"": {((!pad ? appIdPhone : appIdPad) ?? "null")},
-  ""app_key"": ""{(appKey ?? "null")}"",
-  ""sort_version_name"": ""{(sortVersionName ?? "null")}"",
-  ""build_time"": {(buildTime ?? "null")},
-  ""apk_sign"": ""{(apkSign ?? "null")}"",
-  ""sdk_version"": ""{(sdkVersion ?? "null")}"",
-  ""sso_version"": {(ssoVersion ?? "null")},
-  ""misc_bitmap"": {(miscBitmap ?? "null")},
-  ""main_sig_map"": {(mainSigMap ?? "null")},
-  ""sub_sig_map"": {(subSigMap ?? "null")},
-  ""dump_time"": ""{(buildTime ?? "null")}"",
-  ""qua"": ""{(qua ?? "null")}"",
-  ""protocol_type"": {(!pad ? "1" : "6")}
+    ""apk_id"": ""com.tencent.mobileqq"",
+    ""app_id"": {((!pad ? appIdPhone : appIdPad) ?? "null")},
+    ""sub_app_id"": {((!pad ? appIdPhone : appIdPad) ?? "null")},
+    ""app_key"": ""{(appKey ?? "null")}"",
+    ""sort_version_name"": ""{(sortVersionName ?? "null")}"",
+    ""build_time"": {(buildTime ?? "null")},
+    ""apk_sign"": ""{(apkSign ?? "null")}"",
+    ""sdk_version"": ""{(sdkVersion ?? "null")}"",
+    ""sso_version"": {(ssoVersion ?? "null")},
+    ""misc_bitmap"": {(miscBitmap ?? "null")},
+    ""main_sig_map"": {(mainSigMap ?? "null")},
+    ""sub_sig_map"": {(subSigMap ?? "null")},
+    ""dump_time"": ""{(buildTime ?? "null")}"",
+    ""qua"": ""{(qua ?? "null")}"",
+    ""protocol_type"": {(!pad ? "1" : "6")}
 {"}"}
 ";
         }
