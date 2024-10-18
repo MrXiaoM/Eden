@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="eden.ico" />
+    <EmbeddedResource Include="eden.ico" />
   </ItemGroup>
 
   <ItemGroup>
