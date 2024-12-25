@@ -47,7 +47,7 @@ dotnet Eden.CLI.dll 参数
 ```
 示例如下
 ```shell
-mkdir -r protocol-versions/android_phone protocol-versions/android_pad
+mkdir -p protocol-versions/android_phone protocol-versions/android_pad
 dotnet Eden.CLI.dll --working-dir v9065 --eden-apk Android_9.0.65_64.apk --phone-override protocol-versions/android_phone/9.0.65.json --pad-override protocol-versions/android_pad/9.0.65.json
 ```
 
