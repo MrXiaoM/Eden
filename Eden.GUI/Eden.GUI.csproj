@@ -8,14 +8,14 @@
     <UseWPF>true</UseWPF>
     <Authors>MrXiaoM</Authors>
     <Company>MrXiaoM</Company>
-    <Copyright>© 2023-2024 MrXiaoM 保留所有权利</Copyright>
+    <Copyright>© 2023-2025 MrXiaoM 保留所有权利</Copyright>
     <PackageIcon>eden.ico</PackageIcon>
     <RepositoryUrl>https://github.com/MrXiaoM/Eden</RepositoryUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
     <ApplicationIcon>eden.ico</ApplicationIcon>
-    <AssemblyVersion>1.0.6</AssemblyVersion>
-    <FileVersion>1.0.6</FileVersion>
+    <AssemblyVersion>1.0.7</AssemblyVersion>
+    <FileVersion>1.0.7</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
