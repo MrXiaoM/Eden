@@ -29,7 +29,7 @@
 mkdir decompile-full
 tools\procyon.bat -o decompile-full cache/*
 ```
-可能需要*非常久*的时间，大概几个小时，并且及其占用系统资源。
+可能需要*非常久*的时间，大概几个小时，并且极其占用系统资源。
 
 ## CLI 使用方法
 
