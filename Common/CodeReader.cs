@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace Eden
@@ -43,6 +44,8 @@ namespace Eden
                 int subVersion = 0;
                 bool staticBlock = false;
                 int level = 0;
+                StringBuilder sb = new StringBuilder();
+                Regex versionPattern = new Regex("([0-9]+\\.[0-9]+\\.[0-9]+)\\.([0-9]+)");
                 foreach (string line in sAppSetting.Split('\n'))
                 {
                     // 非 static { } 中获取 subVersion
@@ -97,14 +100,23 @@ namespace Eden
                             }
                         }
                         // 读取 sb2.append(""); 获取主版本
-                        if (line.Contains(".append(\""))
+                        if (version == "unknown")
                         {
-                            var s = line.Substring(line.IndexOf(".append(") + 9).Trim().TrimEnd(';').TrimEnd(')').TrimEnd('"');
-                            if (!s.StartsWith("V") && s.EndsWith("."))
+                            if (line.Contains(".append(\""))
                             {
-                                version = s.TrimEnd('.');
-                                protocol.sortVersionName = $"{version}.{subVersion}";
-                                break;
+                                var s = line.Substring(line.IndexOf(".append(") + 9).Trim().TrimEnd(';').TrimEnd(')').TrimEnd('"');
+                                sb.Append(s);
+                            }
+                            else if (sb.Length > 0)
+                            {
+                                var s = sb.ToString();
+                                sb.Clear();
+                                var m = versionPattern.Match(s);
+                                if (m.Success)
+                                {
+                                    version = m.Groups[1].Value;
+                                    protocol.sortVersionName = m.Groups[1].Value + "." + m.Groups[2].Value;
+                                }
                             }
                         }
                     }
