@@ -27,7 +27,7 @@
 如需完整反编译（用于完整分析，方便编写 `CodeReader`），请在第二步慢速转换dex为jar之后执行
 ```shell
 mkdir decompile-full
-tools\procyon.cmd -o decompile-full cache/*
+tools\procyon.bat -o decompile-full cache/*
 ```
 可能需要*非常久*的时间，大概几个小时，并且及其占用系统资源。
 
